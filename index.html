@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toll Nominator — Victoria</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --border: #1e2330;
+    --accent: #e8ff47;
+    --accent2: #47c8ff;
+    --danger: #ff5f57;
+    --text: #e8eaf0;
+    --muted: #5a6070;
+    --success: #4ade80;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,255,71,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,255,71,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 48px;
+  }
+
+  .logo {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  h1 span { color: var(--accent); }
+
+  .badge {
+    margin-left: auto;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Steps */
+  .steps {
+    display: flex;
+    gap: 0;
+    margin-bottom: 40px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .step {
+    flex: 1;
+    padding: 14px 18px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-right: 1px solid var(--border);
+    transition: all 0.3s;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .step:last-child { border-right: none; }
+
+  .step.active {
+    background: rgba(232,255,71,0.06);
+    color: var(--accent);
+  }
+
+  .step.done {
+    color: var(--success);
+  }
+
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Upload zone */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent);
+    background: rgba(232,255,71,0.03);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+  }
+
+  .upload-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .upload-label {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .upload-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Preview */
+  #preview-img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    display: none;
+    margin-top: 16px;
+  }
+
+  /* Data grid */
+  .data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) { .data-grid { grid-template-columns: 1fr; } }
+
+  .data-field {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .field-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .field-value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .field-value.empty { color: var(--muted); font-style: italic; }
+  .field-value.highlight { color: var(--accent); }
+
+  /* Editable field */
+  .field-value input {
+    background: transparent;
+    border: none;
+    color: var(--accent2);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.92rem;
+    font-weight: 600;
+    width: 100%;
+    outline: none;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex; align-items: center; gap: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-primary:hover { background: #d4eb30; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-success {
+    background: var(--success);
+    color: #000;
+  }
+
+  .btn-danger {
+    background: var(--danger);
+    color: #fff;
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+  .btn-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  /* Status bar */
+  #status-bar {
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  #status-bar.info { background: rgba(71,200,255,0.08); border: 1px solid rgba(71,200,255,0.2); color: var(--accent2); display: flex; }
+  #status-bar.success { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2); color: var(--success); display: flex; }
+  #status-bar.error { background: rgba(255,95,87,0.08); border: 1px solid rgba(255,95,87,0.2); color: var(--danger); display: flex; }
+  #status-bar.warn { background: rgba(232,255,71,0.08); border: 1px solid rgba(232,255,71,0.2); color: var(--accent); display: flex; }
+
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Alert review */
+  #review-actions {
+    display: none;
+    background: rgba(232,255,71,0.05);
+    border: 1px solid rgba(232,255,71,0.3);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 20px;
+  }
+
+  #review-actions h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  #review-actions p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* No driver warning */
+  .no-driver {
+    background: rgba(255,95,87,0.06);
+    border: 1px solid rgba(255,95,87,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 0.83rem;
+    color: var(--danger);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Loader overlay */
+  #loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,12,16,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  #loading-overlay.active { display: flex; }
+
+  .big-spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  /* Section visibility */
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  /* Pulse dot */
+  .pulse {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 1.5s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-overlay">
+  <div class="big-spinner"></div>
+  <div class="loading-text" id="loading-text">Reading invoice with Claude Vision...</div>
+</div>
+
+<div class="container">
+  <header>
+    <div class="logo">🛣️</div>
+    <div>
+      <h1>Toll <span>Nominator</span></h1>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace;">Linkt / CityLink · Victoria</div>
+    </div>
+    <div class="badge">Auto-fill</div>
+  </header>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div> Upload Invoice</div>
+    <div class="step" id="step2"><div class="step-num">2</div> Review Data</div>
+    <div class="step" id="step3"><div class="step-num">3</div> Automation</div>
+    <div class="step" id="step4"><div class="step-num">4</div> Submit</div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="status-bar"><div class="spinner" id="status-spinner"></div><span id="status-msg"></span></div>
+
+  <!-- SECTION 1: Upload -->
+  <div class="section visible" id="section-upload">
+    <div class="card">
+      <div class="card-title">Upload Toll Invoice</div>
+      <div class="upload-zone" id="drop-zone">
+        <input type="file" id="invoice-file" accept="image/*,.pdf">
+        <span class="upload-icon">📄</span>
+        <div class="upload-label">Drop your toll invoice here</div>
+        <div class="upload-sub">JPG, PNG · Max 16MB</div>
+      </div>
+      <img id="preview-img" alt="Invoice preview">
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-analyse" disabled>
+          ⚡ Analyse with Claude Vision
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Review extracted data -->
+  <div class="section" id="section-review">
+    <div class="card">
+      <div class="card-title">Toll Invoice Details</div>
+      <div class="data-grid" id="toll-grid"></div>
+    </div>
+
+    <div class="card" id="driver-card">
+      <div class="card-title">Nominated Driver</div>
+      <div id="driver-grid-container">
+        <div class="data-grid" id="driver-grid"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-automate">🤖 Start Browser Automation</button>
+      <button class="btn btn-ghost" id="btn-back">← Back</button>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Automation running -->
+  <div class="section" id="section-automate">
+    <div class="card">
+      <div class="card-title">Browser Automation</div>
+      <p style="color:var(--muted);font-size:0.85rem;font-family:'DM Mono',monospace;margin-bottom:16px;">
+        A Chromium browser window has opened and is filling in the form. Watch the browser.
+      </p>
+      <div id="automation-status-box" style="padding:14px;background:var(--bg);border-radius:10px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--accent2);">
+        <div class="pulse" style="display:inline-block;margin-right:8px;vertical-align:middle;"></div>
+        <span id="auto-status-text">Initialising...</span>
+      </div>
+
+      <div id="review-actions">
+        <h3>✅ Ready for Review</h3>
+        <p>All fields have been filled. Check the browser window, then confirm below.</p>
+        <div class="btn-row" style="margin-top:0">
+          <button class="btn btn-success" id="btn-submit">🚀 Submit Nomination</button>
+          <button class="btn btn-danger" id="btn-cancel">✕ Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: Done -->
+  <div class="section" id="section-done">
+    <div class="card" style="text-align:center;padding:48px;">
+      <div style="font-size:3rem;margin-bottom:16px;">✅</div>
+      <h2 style="font-size:1.4rem;font-weight:800;margin-bottom:8px;">Nomination Submitted</h2>
+      <p style="color:var(--muted);font-family:'DM Mono',monospace;font-size:0.85rem;margin-bottom:24px;">
+        The driver has been nominated successfully on Linkt.
+      </p>
+      <button class="btn btn-primary" id="btn-new">+ New Invoice</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let extractedData = { toll: {}, driver: {}, nominator: {} };
+let statusPoll = null;
+
+// ── Upload & Preview ──────────────────────────────────────────────
+const fileInput = document.getElementById('invoice-file');
+const previewImg = document.getElementById('preview-img');
+const btnAnalyse = document.getElementById('btn-analyse');
+const dropZone = document.getElementById('drop-zone');
+
+fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  btnAnalyse.disabled = false;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    previewImg.src = ev.target.result;
+    previewImg.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    fileInput.files = e.dataTransfer.files;
+    fileInput.dispatchEvent(new Event('change'));
+  }
+});
+
+// ── Analyse ───────────────────────────────────────────────────────
+btnAnalyse.addEventListener('click', async () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  showLoading('Reading invoice with Claude Vision...');
+  setStatus('info', 'Analysing invoice...', true);
+
+  const form = new FormData();
+  form.append('invoice', file);
+
+  try {
+    const res = await fetch('/upload', { method: 'POST', body: form });
+    const data = await res.json();
+    hideLoading();
+
+    if (data.error) { setStatus('error', data.error); return; }
+
+    extractedData = { toll: data.toll, driver: data.driver, nominator: data.nominator || {} };
+    renderReview(data.toll, data.driver);
+    goToSection('section-review');
+    setStep(2);
+    clearStatus();
+  } catch (err) {
+    hideLoading();
+    setStatus('error', 'Failed to analyse invoice: ' + err.message);
+  }
+});
+
+// ── Render Review ─────────────────────────────────────────────────
+function renderReview(toll, driver) {
+  const tollFields = [
+    ['Notice Number', 'notice_number', true],
+    ['Infringement #', 'infringement_number', false],
+    ['Registration', 'vehicle_registration', true],
+    ['State', 'vehicle_state', false],
+    ['Toll Date', 'toll_date', false],
+    ['Toll Time', 'toll_time', false],
+    ['Toll Location', 'toll_location', false],
+    ['Amount Owing', 'amount_owing', true],
+    ['Due Date', 'due_date', true],
+  ];
+
+  document.getElementById('toll-grid').innerHTML = tollFields.map(([label, key, hi]) => {
+    const val = toll[key];
+    return `<div class="data-field">
+      <div class="field-label">${label}</div>
+      <div class="field-value ${val ? (hi ? 'highlight' : '') : 'empty'}">
+        <input value="${val || ''}" placeholder="Not found" data-key="${key}" data-type="toll">
+      </div>
+    </div>`;
+  }).join('');
+
+  if (driver) {
+    const driverFields = [
+      ['First Name', 'first_name'], ['Last Name', 'last_name'],
+      ['Licence Number', 'licence_number'], ['Licence State', 'licence_state'],
+      ['Date of Birth', 'date_of_birth'], ['Email', 'email'],
+      ['Phone', 'phone'], ['Address', 'address'],
+      ['Suburb', 'suburb'], ['Postcode', 'postcode'],
+    ];
+    document.getElementById('driver-grid').innerHTML = driverFields.map(([label, key]) => {
+      const val = driver[key];
+      return `<div class="data-field">
+        <div class="field-label">${label}</div>
+        <div class="field-value">
+          <input value="${val || ''}" placeholder="—" data-key="${key}" data-type="driver">
+        </div>
+      </div>`;
+    }).join('');
+  } else {
+    document.getElementById('driver-grid-container').innerHTML =
+      `<div class="no-driver">⚠️ No driver found for this registration in drivers.csv. Add the rego to your CSV file and re-upload.</div>`;
+  }
+
+  // Sync edits back to extractedData
+  document.querySelectorAll('[data-key]').forEach(input => {
+    input.addEventListener('input', () => {
+      const type = input.dataset.type;
+      const key = input.dataset.key;
+      if (type === 'toll') extractedData.toll[key] = input.value;
+      else extractedData.driver[key] = input.value;
+    });
+  });
+}
+
+// ── Start Automation ──────────────────────────────────────────────
+document.getElementById('btn-automate').addEventListener('click', async () => {
+  setStatus('info', 'Launching browser automation...', true);
+  goToSection('section-automate');
+  setStep(3);
+
+  try {
+    const res = await fetch('/start-automation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(extractedData)
+    });
+    const data = await res.json();
+    if (data.error) { setStatus('error', data.error); return; }
+
+    clearStatus();
+    startStatusPolling();
+  } catch (err) {
+    setStatus('error', 'Could not start automation: ' + err.message);
+  }
+});
+
+// ── Status polling ────────────────────────────────────────────────
+function startStatusPolling() {
+  statusPoll = setInterval(async () => {
+    try {
+      const res = await fetch('/automation-status');
+      const data = await res.json();
+      document.getElementById('auto-status-text').textContent = data.message || data.status;
+
+      if (data.status === 'awaiting_review') {
+        document.getElementById('review-actions').style.display = 'block';
+        setStep(4);
+        clearInterval(statusPoll);
+      } else if (data.status === 'done') {
+        clearInterval(statusPoll);
+        goToSection('section-done');
+      } else if (data.status === 'error') {
+        clearInterval(statusPoll);
+        setStatus('error', data.message);
+      } else if (data.status === 'cancelled') {
+        clearInterval(statusPoll);
+        goToSection('section-review');
+        setStep(2);
+      }
+    } catch {}
+  }, 1000);
+}
+
+// ── Submit / Cancel ───────────────────────────────────────────────
+document.getElementById('btn-submit').addEventListener('click', async () => {
+  setStatus('info', 'Submitting form...', true);
+  const res = await fetch('/submit-form', { method: 'POST' });
+  const data = await res.json();
+  clearStatus();
+  if (data.error) { setStatus('error', data.error); return; }
+  goToSection('section-done');
+  startStatusPolling();
+});
+
+document.getElementById('btn-cancel').addEventListener('click', async () => {
+  await fetch('/cancel-automation', { method: 'POST' });
+  clearInterval(statusPoll);
+  goToSection('section-review');
+  setStep(2);
+  setStatus('warn', 'Automation cancelled. You can make changes and try again.');
+});
+
+document.getElementById('btn-back').addEventListener('click', () => {
+  goToSection('section-upload');
+  setStep(1);
+  clearStatus();
+});
+
+document.getElementById('btn-new').addEventListener('click', () => {
+  extractedData = { toll: {}, driver: {}, nominator: {} };
+  fileInput.value = '';
+  previewImg.style.display = 'none';
+  btnAnalyse.disabled = true;
+  document.getElementById('review-actions').style.display = 'none';
+  goToSection('section-upload');
+  setStep(1);
+  clearStatus();
+});
+
+// ── Helpers ───────────────────────────────────────────────────────
+function goToSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+}
+
+function setStep(n) {
+  document.querySelectorAll('.step').forEach((s, i) => {
+    s.classList.remove('active', 'done');
+    if (i + 1 < n) s.classList.add('done');
+    else if (i + 1 === n) s.classList.add('active');
+  });
+}
+
+function setStatus(type, msg, spinner = false) {
+  const bar = document.getElementById('status-bar');
+  bar.className = type;
+  document.getElementById('status-msg').textContent = msg;
+  document.getElementById('status-spinner').style.display = spinner ? 'block' : 'none';
+}
+
+function clearStatus() {
+  const bar = document.getElementById('status-bar');
+  bar.className = '';
+  bar.style.display = 'none';
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text;
+  document.getElementById('loading-overlay').classList.add('active');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.remove('active');
+}
+</script>
+</body>
+</html>

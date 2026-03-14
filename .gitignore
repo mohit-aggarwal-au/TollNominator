@@ -1,0 +1,83 @@
+# ================================
+
+# Python
+
+# ================================
+
+**pycache**/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Logs
+
+*.log
+
+# Unit test / coverage
+
+.coverage
+.coverage.*
+.cache
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+
+# Jupyter Notebook
+
+.ipynb_checkpoints
+
+# Virtual environments
+
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# Environment variables
+
+.env
+.env.*
+
+# Local databases
+
+*.sqlite3
+*.db
+
+# Temporary files
+
+*.tmp
+*.temp
+tmp/
+temp/
+
+# ================================
+
+# VS Code
+
+# ================================
+
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# ================================
+
+# OS files
+
+# ================================
+
+.DS_Store
+Thumbs.db
